@@ -4,6 +4,7 @@
 ![Vue.js](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vue.js&logoColor=4FC08D)
 ![REST API](https://img.shields.io/badge/API-RESTful-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Flutter](![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge))
 
 ---
 
@@ -87,6 +88,15 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### 4. Jalankan Flutter
+```bash
+cd warung-se-appmob
+flutter pub get
+run wuthout debugging
+```
+
+
 
 Frontend akan berjalan di:  
 👉 `http://localhost:5173`
