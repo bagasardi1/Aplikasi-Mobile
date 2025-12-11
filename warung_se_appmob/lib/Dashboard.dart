@@ -1,20 +1,73 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:warung_se_appmob/TambahMenu.dart';
 import 'package:warung_se_appmob/main.dart';
 import 'package:warung_se_appmob/EditMenu.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  String? token;
+  List<dynamic> menuItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadTokenAndGetMenu();
+  }
+
+  // Ambil token lalu request menu
+  Future<void> loadTokenAndGetMenu() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString("token");
+
+    if (token == null) {
+      print("⚠️ Token tidak ditemukan!");
+      return;
+    }
+
+    print("Token ditemukan: $token");
+    fetchMenu();
+  }
+
+  // GET Menu dari backend Laravel
+  Future<void> fetchMenu() async {
+    try {
+      final response = await http.get(
+        Uri.parse("http://127.0.0.1:8000/api/menu"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
+
+      print("STATUS CODE: ${response.statusCode}");
+      print("BODY: ${response.body}");
+
+      if (response.statusCode == 200) {
+        setState(() {
+          menuItems = json.decode(response.body);
+        });
+      }
+    } catch (e) {
+      print("Error GET MENU: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
 
-      // BAGIAN SIDEBAR
+      // ========== SIDEBAR ==========
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -28,47 +81,44 @@ class Dashboard extends StatelessWidget {
               leading: Icon(Icons.add),
               title: Text("Tambah Menu"),
               onTap: () {
-    Navigator.of(context).pop(); // tutup drawer
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => TambahMenu()), 
-    );
-  },
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => TambahMenu()),
+                );
+              },
             ),
             ListTile(
               leading: Icon(Icons.edit),
               title: Text("Edit Menu"),
               onTap: () {
-                Navigator.of(context).pop(); // tutup drawer
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => EditMenu()), 
-    );
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => EditMenu()),
+                );
               },
             ),
             ListTile(
-  leading: Icon(Icons.logout),
-  title: Text("Logout"),
-  onTap: () async {
-    // Tutup drawer dulu
-    Navigator.of(context).pop();
+              leading: Icon(Icons.logout),
+              title: Text("Logout"),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('access_token');
 
-    // Hapus token login
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('access_token'); // atau prefs.clear();
-
-    // Arahkan kembali ke halaman Login
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => HomePage()),
-    );
-  },
-),
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              },
+            ),
           ],
         ),
       ),
-    
+
+      // ========== APPBAR ==========
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
         toolbarHeight: 190,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,8 +127,8 @@ class Dashboard extends StatelessWidget {
               'assets/images/Pelopor.png',
               height: 40,
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Menu Saya',
               style: TextStyle(
                 fontSize: 24,
@@ -86,7 +136,7 @@ class Dashboard extends StatelessWidget {
                 color: Colors.black,
               ),
             ),
-            const Text(
+            Text(
               'Lihat menu yang anda miliki',
               style: TextStyle(
                 fontSize: 14,
@@ -98,25 +148,26 @@ class Dashboard extends StatelessWidget {
         actions: [
           Builder(
             builder: (context) => Transform.translate(
-            offset: const Offset(0, -35), 
+              offset: Offset(0, -35),
               child: IconButton(
                 icon: Icon(Icons.menu, color: Colors.black, size: 28),
                 onPressed: () {
-                  Scaffold.of(context).openEndDrawer(); // Drawer dari kanan
+                  Scaffold.of(context).openEndDrawer();
                 },
               ),
             ),
           ),
-          const SizedBox(width: 10), 
+          SizedBox(width: 10),
         ],
       ),
 
+      // ========== BODY ==========
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+        padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text(
                 'Daftar Menu',
                 style: TextStyle(
@@ -126,58 +177,52 @@ class Dashboard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+
+            SizedBox(height: 20),
+
+            // Jika menu belum ada (masih loading)
             Expanded(
-              child: ListView.separated(
-                itemCount: menuItems.length,
-                separatorBuilder: (_, __) => Divider(color: const Color.fromARGB(255, 251, 251, 251)),
-                itemBuilder: (context, index) {
-                  final item = menuItems[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: AssetImage(item['image']),
-                      radius: 25,
+              child: menuItems.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      itemCount: menuItems.length,
+                      separatorBuilder: (_, __) =>
+                          Divider(color: Colors.grey.shade200),
+
+                      itemBuilder: (context, index) {
+                        final item = menuItems[index];
+
+                        return ListTile(
+                          leading: CircleAvatar(
+                            radius: 25,
+                            backgroundImage: item['gambar_url'] != null
+                                ? NetworkImage(item['gambar_url'])
+                                : AssetImage("images/noimage.png")
+                                    as ImageProvider,
+                          ),
+                          title: Text(
+                            item['menu'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Text(item['kategori']),
+                          trailing: Text(
+                            "Rp ${item['harga']}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    title: Text(
-                      item['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    trailing: Text(
-                      item['price'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                },
-          ),
-          ),
-        ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-final List<Map<String, dynamic>> menuItems = [
-  {
-    'name': 'Ayam Geprek Sambal Matah',
-    'price': 'Rp. 10.000',
-    'image': 'assets/ayam_geprek_1.jpg',
-  },
-  {
-    'name': 'Ayam Geprek Lada Hitam',
-    'price': 'Rp. 10.000',
-    'image': 'assets/ayam_geprek_2.jpg',
-  },
-  {
-    'name': 'Ayam Geprek Keju',
-    'price': 'Rp. 10.000',
-    'image': 'assets/ayam_geprek_3.jpg',
-  },
-];

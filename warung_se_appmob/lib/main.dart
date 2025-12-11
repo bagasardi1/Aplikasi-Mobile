@@ -58,6 +58,8 @@ class _HomePageState extends State<HomePage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', data['access_token']);
 
+        print("TOKEN DISIMPAN: ${data['access_token']}");
+
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

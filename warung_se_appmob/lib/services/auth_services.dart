@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api/';
+  static const String baseUrl = 'http://127.0.0.1:8000/api';
 
   // ======================
   // LOGIN
@@ -23,7 +23,7 @@ class AuthService {
     // Simpan token jika login berhasil
     if (response.statusCode == 200 && data['token'] != null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']);
+      await prefs.setString('token', data['access_token']);
     }
 
     return data;
