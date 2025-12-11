@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   animate_do: ^3.1.2
+  http: ^1.6.0
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:
