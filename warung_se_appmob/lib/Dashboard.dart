@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:warung_se_appmob/TambahMenu.dart';
 import 'package:warung_se_appmob/main.dart';
 import 'package:warung_se_appmob/EditMenu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 class Dashboard extends StatelessWidget {
@@ -43,15 +45,22 @@ class Dashboard extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-              onTap: () {
-    Navigator.of(context).pop(); // tutup drawer
+  leading: Icon(Icons.logout),
+  title: Text("Logout"),
+  onTap: () async {
+    // Tutup drawer dulu
+    Navigator.of(context).pop();
+
+    // Hapus token login
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token'); // atau prefs.clear();
+
+    // Arahkan kembali ke halaman Login
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => HomePage()), 
+      MaterialPageRoute(builder: (context) => HomePage()),
     );
   },
-            ),
+),
           ],
         ),
       ),

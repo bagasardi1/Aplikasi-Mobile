@@ -52,10 +52,11 @@ class _HomePageState extends State<HomePage> {
       );
 
       final data = jsonDecode(response.body);
+      print(response.body);
 
-      if (response.statusCode == 200 && data['token'] != null) {
+      if (response.statusCode == 200 && data['access_token'] != null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', data['token']);
+        await prefs.setString('token', data['access_token']);
 
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
