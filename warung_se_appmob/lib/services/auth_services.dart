@@ -5,9 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static const String baseUrl = 'http://127.0.0.1:8000/api';
 
-  // ======================
+  
   // LOGIN
-  // ======================
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('${baseUrl}login'),
@@ -29,27 +28,8 @@ class AuthService {
     return data;
   }
 
-  // ======================
-  // REGISTER
-  // ======================
-  Future<Map<String, dynamic>> register(String name, String email, String password) async {
-    final response = await http.post(
-      Uri.parse('${baseUrl}register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nama_user': name,
-        'email_user': email,
-        'password': password,
-        'password_confirmation': password,
-      }),
-    );
-
-    return jsonDecode(response.body);
-  }
-
-  // ======================
+  
   // GET PROFILE
-  // ======================
   Future<Map<String, dynamic>> getProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');

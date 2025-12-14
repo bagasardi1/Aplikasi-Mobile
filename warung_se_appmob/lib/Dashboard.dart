@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:warung_se_appmob/TambahMenu.dart';
 import 'package:warung_se_appmob/main.dart';
 import 'package:warung_se_appmob/edit_menu.dart';
@@ -25,21 +24,14 @@ class _DashboardState extends State<Dashboard> {
     
   }
 
-  // Ambil token lalu request menu
+  // pengambilan token dan request menu
   Future<void> loadTokenAndGetMenu() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
-
-    if (token == null) {
-      print("⚠️ Token tidak ditemukan!");
-      return;
-    }
-
-    print("Token ditemukan: $token");
     fetchMenu();
   }
 
-  // GET Menu dari backend Laravel
+  // ambil menu daru BE
   Future<void> fetchMenu() async {
     try {
       final response = await http.get(
@@ -50,16 +42,12 @@ class _DashboardState extends State<Dashboard> {
         },
       );
 
-      print("STATUS CODE: ${response.statusCode}");
-      print("BODY: ${response.body}");
-
       if (response.statusCode == 200) {
         setState(() {
           menuItems = json.decode(response.body);
         });
       }
     } catch (e) {
-      print("Error GET MENU: $e");
     }
   }
 
@@ -68,7 +56,7 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
 
-      // ========== SIDEBAR ==========
+      // SIDEBAR
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -106,7 +94,7 @@ class _DashboardState extends State<Dashboard> {
         ),
       ),
 
-      // ========== APPBAR ==========
+      // APPBAR 
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -153,7 +141,8 @@ class _DashboardState extends State<Dashboard> {
         ],
       ),
 
-      // ========== BODY ==========
+
+      // BODY 
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
         child: Column(
@@ -172,11 +161,11 @@ class _DashboardState extends State<Dashboard> {
 
             SizedBox(height: 20),
 
-            // Jika menu belum ada (masih loading)
+            // Jika menu belum ada (loading)
             Expanded(
               child: menuItems.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.separated(
+                  ? Center(child: CircularProgressIndicator()) // masih loading
+                  : ListView.separated( //sudah tampil menu
                       itemCount: menuItems.length,
                       separatorBuilder: (_, __) =>
                           Divider(color: Colors.grey.shade200),
@@ -218,8 +207,9 @@ class _DashboardState extends State<Dashboard> {
                             ),
 
                             trailing: IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              icon: const Icon(Icons.edit, color: Colors.blue), //ambil material
                               onPressed: () {
+                                //arahin ke halaman edit menu
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => EditMenu(
@@ -230,8 +220,6 @@ class _DashboardState extends State<Dashboard> {
                               },
                             ),
                           );
-
-
                       },
                     ),
             ),
