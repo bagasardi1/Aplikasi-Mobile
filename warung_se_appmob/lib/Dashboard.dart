@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:warung_se_appmob/TambahMenu.dart';
 import 'package:warung_se_appmob/main.dart';
-import 'package:warung_se_appmob/EditMenu.dart';
+import 'package:warung_se_appmob/edit_menu.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -22,6 +22,7 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     loadTokenAndGetMenu();
+    
   }
 
   // Ambil token lalu request menu
@@ -87,16 +88,7 @@ class _DashboardState extends State<Dashboard> {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.edit),
-              title: Text("Edit Menu"),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => EditMenu()),
-                );
-              },
-            ),
+            
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Logout"),
@@ -191,32 +183,55 @@ class _DashboardState extends State<Dashboard> {
 
                       itemBuilder: (context, index) {
                         final item = menuItems[index];
-
+                          
                         return ListTile(
-                          leading: CircleAvatar(
-                            radius: 25,
-                            backgroundImage: item['gambar_url'] != null
-                                ? NetworkImage(item['gambar_url'])
-                                : AssetImage("images/noimage.png")
-                                    as ImageProvider,
-                          ),
-                          title: Text(
-                            item['menu'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                            leading: CircleAvatar(
+                              radius: 25,
+                              backgroundImage: item['gambar_menu'] != null
+                                  ? NetworkImage(
+                                      "http://127.0.0.1:8000/api/menu-image/${item['gambar_menu']}",
+                                    )
+                                  : AssetImage('') as ImageProvider,
                             ),
-                          ),
-                          subtitle: Text(item['kategori']),
-                          trailing: Text(
-                            "Rp ${item['harga']}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black,
+
+                            title: Text(
+                              item['menu'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                        );
+
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item['kategori']),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Rp ${item['harga']}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditMenu(
+                                      menuData: item,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+
+
                       },
                     ),
             ),
